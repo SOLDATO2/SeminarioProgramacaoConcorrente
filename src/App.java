@@ -8,7 +8,6 @@ public class App {
         //exemplo base da utilização do Future
         // https://download.java.net/java/early_access/valhalla/docs/api/java.base/java/util/concurrent/Future.html
         ExecutorService executor = Executors.newFixedThreadPool(3);
-
         Future<String> f1 = executor.submit(new GetClienteTask());
         Future<String> f2 = executor.submit(new GetPedidosTask());
         Future<String> f3 = executor.submit(new GetRecomendacoesTask());
@@ -21,7 +20,6 @@ public class App {
 
 
         //exemplos de metodos do Future
-
         //Exemplo 1: .cancel() + .isCancelled() e get padrao
         ExecutorService executorEx1 = Executors.newFixedThreadPool(3);
 
@@ -67,19 +65,16 @@ public class App {
             return "Resultado concluído";
         });
 
-        //antes da conclusao
-        System.out.println("Antes da conclusão, isDone(): " + futuro.isDone());
+        System.out.println("Antes da conclusão, isDone(): " + futuro.isDone()); //antes da conclusao
         String resultadoAntes;
         try {
-            // Tenta obter sem esperar, lança Exception se ainda n terminou
-            resultadoAntes = futuro.resultNow();
+            resultadoAntes = futuro.resultNow(); // Tenta obter sem esperar, lança Exception se ainda n terminou
         } catch (IllegalStateException e) {
             resultadoAntes = "Ainda sem resultado...";
         }
         System.out.println("Resultado com resultNow() antes da conclusão: " + resultadoAntes);
 
-        // espera tarefa terminar
-        Thread.sleep(2500);
+        Thread.sleep(2500);        // espera tarefa terminar
 
         // dps da conclusao
         System.out.println("Depois da conclusão, isDone(): " + futuro.isDone());

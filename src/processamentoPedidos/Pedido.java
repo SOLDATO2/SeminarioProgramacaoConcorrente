@@ -1,3 +1,4 @@
+package processamentoPedidos;
 public class Pedido {
 
     private final Integer id;

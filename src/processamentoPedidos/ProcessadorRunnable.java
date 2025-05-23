@@ -1,3 +1,4 @@
+package processamentoPedidos;
 public class ProcessadorRunnable implements Runnable {
     private final Pedido pedido;
 
