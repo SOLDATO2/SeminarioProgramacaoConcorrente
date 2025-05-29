@@ -1,52 +1,56 @@
 package processamentoPedidos;
+
 import java.io.IOException;
 import java.util.concurrent.*;
 
 public class Main {
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Exception 
+    {
+        //Criação e instância de Future
         exemploRunnable();
         exemploCallable();
         exemploCompletedFuture();
         exemploFailedFuture();
-        exemploSupplyAsync();
+        exemploMinimalCompletionStage();
+        exemploCompletedAndFailedStage();
 
+        //“Kick-off” assíncrono
+        exemploSupplyAsync();
         exemploRunAsync();
+        exemploRunAsyncWithExecutor();
+        exemploCompleteAsync();
+        exemploCustomExecutor();
+        exemploDefaultAndDelayedExecutor();
+
+        //Transformações sequenciais (“map” / “flatMap”)
         exemploThenApply();
         exemploThenCompose();
+        exemploThenRun();
+        exemploGetNow();
+
+        //Composição de múltiplas tarefas
         exemploThenCombine();
         exemploThenAcceptBoth();
-
         exemploRunAfterBoth();
+        exemploAllOfAnyOf();
+
+        //Corrida, timeouts e respostas rápidas
         exemploApplyToEither();
         exemploAcceptEither();
         exemploRunAfterEither();
-        exemploWhenComplete();
-
-        exemploHandle();
-        exemploExceptionally();
         exemploTimeouts();
-        exemploAllOfAnyOf();
-        exemploObtrude();
-
-        exemploCancelamento();
-        exemploMinimalCompletionStage();
-        exemploCustomExecutor();
-        exemploThenRun();
-        exemploCompleteAsync();
-
-        exemploGetNow();
-        exemploDefaultAndDelayedExecutor();
-        exemploCompletedAndFailedStage();
-        exemploWhenCompleteAsync();
-        exemploHandleAsync();
-
-        exemploExceptionallyAsync();
-        exemploExceptionallyCompose();
         exemploGetWithTimeout();
-        exemploRunAsyncWithExecutor();
 
+        //Tratamento de erro e utilitários avançados
+        exemploWhenComplete();
+        exemploWhenCompleteAsync();
+        exemploHandle();
+        exemploHandleAsync();
+        exemploExceptionally();
+        exemploCancelamento();
+        exemploObtrude();
     }
-    
+
     // ==== Runnable com Pedido ====
     static void exemploRunnable() throws InterruptedException {
         System.out.println("\n=== Runnable com Pedido ===");
@@ -71,7 +75,6 @@ public class Main {
         System.out.println(resultado.get());
         executor.shutdown();
 
-
         try {
             aguardarInput();
         } catch (InterruptedException | IOException e) {
@@ -85,7 +88,6 @@ public class Main {
         Pedido p = new Pedido(3, "Esfiha");
         CompletableFuture<Pedido> cf = CompletableFuture.completedFuture(p);
         System.out.println("Pedido pronto: " + cf.get());
-
 
         try {
             aguardarInput();
@@ -104,7 +106,6 @@ public class Main {
             return null;
         });
 
-
         try {
             aguardarInput();
         } catch (InterruptedException | IOException e) {
@@ -117,12 +118,14 @@ public class Main {
         System.out.println("\n=== supplyAsync com Pedido ===");
         Pedido p = new Pedido(5, "Hambúrguer");
         CompletableFuture<Pedido> cf = CompletableFuture.supplyAsync(() -> {
-            try { Thread.sleep(150); } catch (InterruptedException ignored) {}
+            try {
+                Thread.sleep(150);
+            } catch (InterruptedException ignored) {
+            }
             System.out.println("Preparando " + p);
             return p;
         });
         System.out.println("Pedido retornado: " + cf.get());
-
 
         try {
             aguardarInput();
@@ -140,8 +143,6 @@ public class Main {
         });
         cf.join();
 
-
-
         try {
             aguardarInput();
         } catch (InterruptedException | IOException e) {
@@ -154,12 +155,11 @@ public class Main {
         System.out.println("\n=== thenApply ===");
         Pedido p = new Pedido(7, "Pastel");
         CompletableFuture.completedFuture(p)
-            .thenApply(ped -> {
-                System.out.println("Fritando: " + ped);
-                return new Pedido(ped.getId(), ped.getDescricao() + " Frito");
-            })
-            .thenAccept(res -> System.out.println("Final: " + res));
-
+                .thenApply(ped -> {
+                    System.out.println("Fritando: " + ped);
+                    return new Pedido(ped.getId(), ped.getDescricao() + " Frito");
+                })
+                .thenAccept(res -> System.out.println("Final: " + res));
 
         try {
             aguardarInput();
@@ -173,12 +173,11 @@ public class Main {
         System.out.println("\n=== thenCompose ===");
         Pedido p = new Pedido(8, "Empada");
         CompletableFuture.completedFuture(p)
-            .thenCompose(ped -> CompletableFuture.supplyAsync(() -> {
-                System.out.println("Assando: " + ped);
-                return new Pedido(ped.getId(), ped.getDescricao() + " Assada");
-            }))
-            .thenAccept(res -> System.out.println("Pronto: " + res));
-
+                .thenCompose(ped -> CompletableFuture.supplyAsync(() -> {
+                    System.out.println("Assando: " + ped);
+                    return new Pedido(ped.getId(), ped.getDescricao() + " Assada");
+                }))
+                .thenAccept(res -> System.out.println("Pronto: " + res));
 
         try {
             aguardarInput();
@@ -196,8 +195,7 @@ public class Main {
         CompletableFuture<Pedido> f2 = CompletableFuture.completedFuture(p2);
 
         f1.thenCombine(f2, (a, b) -> "Combo: " + a + " + " + b)
-          .thenAccept(System.out::println);
-
+                .thenAccept(System.out::println);
 
         try {
             aguardarInput();
@@ -216,8 +214,6 @@ public class Main {
 
         f1.thenAcceptBoth(f2, (a, b) -> System.out.println("Servindo juntos: " + a + " e " + b));
 
-
-
         try {
             aguardarInput();
         } catch (InterruptedException | IOException e) {
@@ -235,8 +231,6 @@ public class Main {
 
         f1.runAfterBoth(f2, () -> System.out.println("Batata e Molho prontos para servir!"));
 
-
-
         try {
             aguardarInput();
         } catch (InterruptedException | IOException e) {
@@ -250,17 +244,25 @@ public class Main {
         Pedido p1 = new Pedido(15, "Pão");
         Pedido p2 = new Pedido(16, "Bolo");
         CompletableFuture<Pedido> f1 = CompletableFuture.supplyAsync(() -> {
-            try { Thread.sleep(100); } catch (InterruptedException ignored) {}
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ignored) {
+            }
             return p1;
         });
         CompletableFuture<Pedido> f2 = CompletableFuture.supplyAsync(() -> {
-            try { Thread.sleep(200); } catch (InterruptedException ignored) {}
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException ignored) {
+            }
             return p2;
         });
         f1.applyToEither(f2, p -> "Primeiro pronto: " + p)
-          .thenAccept(System.out::println);
-        try { Thread.sleep(250); } catch (InterruptedException ignored) {}
-
+                .thenAccept(System.out::println);
+        try {
+            Thread.sleep(250);
+        } catch (InterruptedException ignored) {
+        }
 
         try {
             aguardarInput();
@@ -277,8 +279,10 @@ public class Main {
         CompletableFuture<Pedido> f1 = CompletableFuture.supplyAsync(() -> p1);
         CompletableFuture<Pedido> f2 = CompletableFuture.supplyAsync(() -> p2);
         f1.acceptEither(f2, p -> System.out.println("Primeiro servido: " + p));
-        try { Thread.sleep(100); } catch (InterruptedException ignored) {}
-
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException ignored) {
+        }
 
         try {
             aguardarInput();
@@ -295,8 +299,10 @@ public class Main {
         CompletableFuture<Pedido> f1 = CompletableFuture.supplyAsync(() -> p1);
         CompletableFuture<Pedido> f2 = CompletableFuture.supplyAsync(() -> p2);
         f1.runAfterEither(f2, () -> System.out.println("Um doce já está pronto!"));
-        try { Thread.sleep(100); } catch (InterruptedException ignored) {}
-
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException ignored) {
+        }
 
         try {
             aguardarInput();
@@ -312,7 +318,6 @@ public class Main {
         CompletableFuture<Pedido> f = CompletableFuture.completedFuture(p);
         f.whenComplete((res, ex) -> System.out.println("Pedido finalizado: " + res));
 
-
         try {
             aguardarInput();
         } catch (InterruptedException | IOException e) {
@@ -326,8 +331,7 @@ public class Main {
         Pedido p = new Pedido(22, "Wrap");
         CompletableFuture<Pedido> f = CompletableFuture.completedFuture(p);
         f.handle((res, ex) -> res != null ? res : new Pedido(-1, "Pedido vazio"))
-         .thenAccept(System.out::println);
-
+                .thenAccept(System.out::println);
 
         try {
             aguardarInput();
@@ -346,7 +350,6 @@ public class Main {
             return new Pedido(-1, "Pedido substituto");
         }).thenAccept(System.out::println);
 
-
         try {
             aguardarInput();
         } catch (InterruptedException | IOException e) {
@@ -360,17 +363,16 @@ public class Main {
         Pedido p = new Pedido(24, "Yakissoba");
         CompletableFuture<Pedido> cf = new CompletableFuture<>();
         cf.orTimeout(300, TimeUnit.MILLISECONDS)
-          .exceptionally(ex -> {
-              System.out.println("Timeout ao preparar: " + p);
-              return new Pedido(-2, "Timeout: " + p.getDescricao());
-          }).thenAccept(System.out::println);
+                .exceptionally(ex -> {
+                    System.out.println("Timeout ao preparar: " + p);
+                    return new Pedido(-2, "Timeout: " + p.getDescricao());
+                }).thenAccept(System.out::println);
         Thread.sleep(350);
 
         CompletableFuture<Pedido> cf2 = new CompletableFuture<>();
         cf2.completeOnTimeout(p, 200, TimeUnit.MILLISECONDS)
-            .thenAccept(res -> System.out.println("Entrega forçada: " + res));
+                .thenAccept(res -> System.out.println("Entrega forçada: " + res));
         Thread.sleep(250);
-
 
         try {
             aguardarInput();
@@ -388,8 +390,8 @@ public class Main {
         CompletableFuture<Pedido> f2 = CompletableFuture.supplyAsync(() -> p2);
 
         CompletableFuture.allOf(f1, f2).thenRun(() -> System.out.println("Sobremesas prontas!")).join();
-        CompletableFuture.anyOf(f1, f2).thenAccept(res -> System.out.println("Primeira sobremesa pronta: " + res)).join();
-
+        CompletableFuture.anyOf(f1, f2).thenAccept(res -> System.out.println("Primeira sobremesa pronta: " + res))
+                .join();
 
         try {
             aguardarInput();
@@ -408,8 +410,11 @@ public class Main {
 
         CompletableFuture<Pedido> cf2 = new CompletableFuture<>();
         cf2.obtrudeException(new RuntimeException("Cancelado"));
-        try { cf2.join(); } catch (Exception e) { System.out.println("Pedido cancelado: " + e); }
-
+        try {
+            cf2.join();
+        } catch (Exception e) {
+            System.out.println("Pedido cancelado: " + e);
+        }
 
         try {
             aguardarInput();
@@ -425,7 +430,6 @@ public class Main {
         System.out.println("Antes: isDone=" + cf.isDone() + ", isCancelled=" + cf.isCancelled());
         cf.cancel(true);
         System.out.println("Depois: isDone=" + cf.isDone() + ", isCancelled=" + cf.isCancelled());
-
 
         try {
             aguardarInput();
@@ -445,7 +449,6 @@ public class Main {
         CompletableFuture<Pedido> cfCopy = cf.copy();
         System.out.println("copy: " + cfCopy.join());
 
-
         try {
             aguardarInput();
         } catch (InterruptedException | IOException e) {
@@ -459,10 +462,9 @@ public class Main {
         Pedido p = new Pedido(29, "Bolo de Cenoura");
         ExecutorService pool = Executors.newFixedThreadPool(2);
         CompletableFuture.supplyAsync(() -> p, pool)
-            .thenAccept(res -> System.out.println("Processado com pool: " + res))
-            .join();
+                .thenAccept(res -> System.out.println("Processado com pool: " + res))
+                .join();
         pool.shutdown();
-
 
         try {
             aguardarInput();
@@ -477,9 +479,8 @@ public class Main {
         Pedido p = new Pedido(30, "Esfiha");
         CompletableFuture<Pedido> cf = CompletableFuture.completedFuture(p);
         cf.thenRun(() -> System.out.println("thenRun: ação executada para " + p.getDescricao()))
-          .thenRunAsync(() -> System.out.println("thenRunAsync: executado async para " + p.getDescricao()));
-        Thread.sleep(100);  // espera o async completar
-
+                .thenRunAsync(() -> System.out.println("thenRunAsync: executado async para " + p.getDescricao()));
+        Thread.sleep(100); // espera o async completar
 
         try {
             aguardarInput();
@@ -498,13 +499,12 @@ public class Main {
         });
         System.out.println("Resultado completeAsync: " + cf.join());
 
-
         try {
             aguardarInput();
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
         }
-    } 
+    }
 
     // ==== getNow ===
     static void exemploGetNow() {
@@ -515,13 +515,12 @@ public class Main {
         cf.complete(new Pedido(32, "Beirute"));
         System.out.println("getNow (após complete): " + cf.getNow(semPedido));
 
-
         try {
             aguardarInput();
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
         }
-    }  
+    }
 
     // ==== defaultExecutor / delayedExecutor ===
     static void exemploDefaultAndDelayedExecutor() throws InterruptedException {
@@ -535,13 +534,10 @@ public class Main {
         Executor delayer = CompletableFuture.delayedExecutor(200, TimeUnit.MILLISECONDS);
         delayer.execute(() -> System.out.println("Executado após delay (defaultExecutor)"));
 
-        Executor delayerCustom =
-            CompletableFuture.delayedExecutor(200, TimeUnit.MILLISECONDS, execPadrao);
-        delayerCustom.execute(() ->
-            System.out.println("Executado após delay (executor customizado)"));
+        Executor delayerCustom = CompletableFuture.delayedExecutor(200, TimeUnit.MILLISECONDS, execPadrao);
+        delayerCustom.execute(() -> System.out.println("Executado após delay (executor customizado)"));
 
         Thread.sleep(300);
-
 
         try {
             aguardarInput();
@@ -549,7 +545,6 @@ public class Main {
             e.printStackTrace();
         }
     }
-
 
     // ==== completedStage / failedStage ===
     static void exemploCompletedAndFailedStage() {
@@ -562,13 +557,12 @@ public class Main {
             return null;
         });
 
-
         try {
             aguardarInput();
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
         }
-    } 
+    }
 
     // ==== whenCompleteAsync ===
     static void exemploWhenCompleteAsync() throws InterruptedException {
@@ -578,13 +572,12 @@ public class Main {
         cf.whenCompleteAsync((res, ex) -> System.out.println("whenCompleteAsync: " + res));
         Thread.sleep(100);
 
-
         try {
             aguardarInput();
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
         }
-    } 
+    }
 
     // ==== handleAsync ===
     static void exemploHandleAsync() throws InterruptedException {
@@ -601,7 +594,6 @@ public class Main {
         }).thenAccept(ped -> System.out.println("handleAsync final: " + ped));
         Thread.sleep(100);
 
-
         try {
             aguardarInput();
         } catch (InterruptedException | IOException e) {
@@ -609,52 +601,14 @@ public class Main {
         }
     }
 
-    // ==== exceptionallyAsync ===
-    static void exemploExceptionallyAsync() throws InterruptedException {
-        System.out.println("\n=== exceptionallyAsync ===");
-        CompletableFuture<Pedido> cf = CompletableFuture.failedFuture(new RuntimeException("Ingrediente esgotado"));
-        cf.exceptionallyAsync(ex -> {
-            System.out.println("exceptionallyAsync: " + ex.getMessage());
-            return new Pedido(-1, "Pedido Substituto Async");
-        }).thenAccept(ped -> System.out.println("exceptionallyAsync final: " + ped));
-        Thread.sleep(100);
-
-
-        try {
-            aguardarInput();
-        } catch (InterruptedException | IOException e) {
-            e.printStackTrace();
-        }
-    } 
-
-    // ==== exceptionallyCompose / exceptionallyComposeAsync ===
-    static void exemploExceptionallyCompose() {
-        System.out.println("\n=== exceptionallyCompose / exceptionallyComposeAsync ===");
-        CompletableFuture<Pedido> cf = CompletableFuture.failedFuture(new Exception("Falha crítica"));
-        cf.exceptionallyCompose(ex -> {
-            System.out.println("exceptionallyCompose: " + ex.getMessage());
-            return CompletableFuture.completedFuture(new Pedido(-1, "Pedido Fallback"));
-        }).thenAccept(ped -> System.out.println("exceptionallyCompose final: " + ped));
-
-        cf.exceptionallyComposeAsync(ex -> {
-            System.out.println("exceptionallyComposeAsync: " + ex.getMessage());
-            return CompletableFuture.completedFuture(new Pedido(-1, "Pedido Fallback Async"));
-        }).thenAccept(ped -> System.out.println("exceptionallyComposeAsync final: " + ped));
-
-
-
-        try {
-            aguardarInput();
-        } catch (InterruptedException | IOException e) {
-            e.printStackTrace();
-        }
-    } 
-
     // ==== get com timeout ===
     static void exemploGetWithTimeout() {
         System.out.println("\n=== get com timeout ===");
         CompletableFuture<Pedido> cf = CompletableFuture.supplyAsync(() -> {
-            try { Thread.sleep(200); } catch (InterruptedException ignored) {}
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException ignored) {
+            }
             return new Pedido(35, "Churrasco");
         });
         try {
@@ -662,8 +616,6 @@ public class Main {
         } catch (TimeoutException | InterruptedException | ExecutionException ex) {
             System.out.println("TimeoutException recebido");
         }
-
-
 
         try {
             aguardarInput();
@@ -677,10 +629,9 @@ public class Main {
         System.out.println("\n=== runAsync with Executor ===");
         ExecutorService exec = Executors.newSingleThreadExecutor();
         CompletableFuture<Void> cf = CompletableFuture.runAsync(
-            () -> System.out.println("runAsync em executor custom"), exec);
+                () -> System.out.println("runAsync em executor custom"), exec);
         cf.join();
         exec.shutdown();
-
 
         try {
             aguardarInput();
@@ -689,17 +640,8 @@ public class Main {
         }
     }
 
-
-
-
-
-
-
-
-
-
-    //funcao para avançar exemplo com base no input
-    static void aguardarInput() throws InterruptedException, IOException{
+    // funcao para avançar exemplo com base no input
+    static void aguardarInput() throws InterruptedException, IOException {
         System.out.println("Exemplo terminou. Pressione Enter para continuar...");
         new java.util.Scanner(System.in).nextLine();
         new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();

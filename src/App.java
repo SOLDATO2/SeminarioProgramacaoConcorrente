@@ -17,6 +17,10 @@ public class App {
 
         executor.shutdown();
 
+        System.out.println("Exemplo terminou. Pressione Enter para continuar...");
+        new java.util.Scanner(System.in).nextLine();
+        new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+
 
 
         //exemplos de metodos do Future
